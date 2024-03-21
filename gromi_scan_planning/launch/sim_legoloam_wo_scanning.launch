@@ -1,0 +1,41 @@
+<launch>
+
+    <include file="$(find gromi_scan_planning)/launch/world.launch">
+	<arg name="world_name" value="$(find gromi_scan_planning)/worlds/parking_lot.world" />
+	<!-- parking_lot, cylinders, boxes, parking_lot, jackal_race, willow_garage, office, office_2 -->
+    </include>
+
+    <!--- Run gmapping -->
+    <include file="$(find gromi_scan_planning)/launch/include/lego_loam_run.launch" />
+
+    <!--- Run Move Base -->
+    <include file="$(find gromi_scan_planning)/launch/include/move_base.launch" />
+
+    <!--- Run Twist Mux -->
+    <include file="$(find gromi_scan_planning)/launch/twist_mux.launch" />
+
+    <node pkg="gromi_scan_planning" type="pt_generation.py" name="pt" output="screen"/>
+    
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <param name="resolution" value="0.2" />
+	<param name="frame_id" type="string" value="map" />
+        <param name="sensor_model/max_range" value="100.0" />
+	<remap from="cloud_in" to="/segmented_cloud_pure" />
+	<remap from="projected_map" to="map" />
+	<param name="pointcloud_min_z" value="-1.0"/>
+     	<param name="pointcloud_max_z" value="2.0"/>
+    </node>
+
+    <node pkg="gromi_scan_planning" type="find_frontier_and_move.py" name="explore" output="screen" />
+
+    <!--node pkg="gromi_scan_planning" type="explore_wo_scanning.py" name="explore" output="screen" /-->
+
+    <!--node pkg="gromi_scan_planning" type="change_topic_name.py" name="change_topic_name" output="screen" /-->
+
+    <!--node pkg="gromi_scan_planning" type="gromi_static_scan.py" name="gromi_static_scan" output="screen" /-->
+
+    <node pkg="gromi_scan_planning" type="motor_controller.py" name="wheel_motor_controller" output="screen" />
+
+    <!--node pkg="gromi_scan_planning" type="scan_motor_controller.py" name="scan_motor_controller" output="screen" /-->
+
+</launch>

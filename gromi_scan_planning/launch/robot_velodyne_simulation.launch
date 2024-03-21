@@ -1,0 +1,12 @@
+<launch>
+
+    <include file="$(find gromi_scan_planning)/launch/world.launch">
+	<arg name="world_name" value="$(find gromi_scan_planning)/worlds/boxes.world" />
+	<!-- cylinders, boxes, parking_lot -->
+    </include>
+
+    <include file="$(find gromi_scan_planning)/launch/include/gmapping.launch" >
+      <arg name="delta_value" value="0.02" />
+    </include>
+
+</launch>

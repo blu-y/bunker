@@ -1,0 +1,20 @@
+<launch>
+
+  <!--- Run gmapping -->
+  <include file="$(find gromi_scan_planning)/launch/include/lego_loam_run.launch" />
+
+  <!--- Run Move Base -->
+  <include file="$(find gromi_scan_planning)/launch/include/move_base.launch" />
+
+  <!--- Run Pointcloud Filter -->
+  <include file="$(find gromi_scan_planning)/launch/pointcloud_filter.launch" />
+
+  <!--- Run Pointcloud to Laserscan -->
+  <include file="$(find gromi_scan_planning)/launch/point2laser.launch" />
+
+  <!--- Run Twist Mux -->
+  <include file="$(find gromi_scan_planning)/launch/twist_mux.launch" />
+
+  <!-- <node pkg="gromi_scan_planning" type="z_correction.py" name="z_correction" output="screen" /> -->
+
+</launch>

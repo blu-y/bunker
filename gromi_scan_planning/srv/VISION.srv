@@ -1,0 +1,3 @@
+int32 picture_id
+---
+bool completion

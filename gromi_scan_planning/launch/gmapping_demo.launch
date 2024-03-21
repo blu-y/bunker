@@ -1,0 +1,21 @@
+<launch>
+
+  <arg name="delta_value" default="0.1" />
+  <arg name="xmin" default="-10.0"/>
+  <arg name="ymin" default="-10.0"/>
+  <arg name="xmax" default="10.0"/>
+  <arg name="ymax" default="10.0"/>
+
+  <!--- Run gmapping -->
+  <include file="$(find gromi_scan_planning)/launch/include/gmapping.launch" >
+    <arg name="delta_value" value="$(arg delta_value)" />
+    <arg name="xmin" value="$(arg xmin)"/>
+    <arg name="ymin" value="$(arg ymin)"/>
+    <arg name="xmax" value="$(arg xmax)"/>
+    <arg name="ymax" value="$(arg ymax)"/>
+  </include>
+
+  <!--- Run Move Base -->
+  <include file="$(find gromi_scan_planning)/launch/include/move_base.launch" />
+
+</launch>
