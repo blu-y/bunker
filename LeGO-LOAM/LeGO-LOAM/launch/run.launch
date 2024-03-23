@@ -19,3 +19,4 @@
     <node pkg="lego_loam" type="transformFusion"    name="transformFusion"    output="screen"/>
 
 </launch>
+

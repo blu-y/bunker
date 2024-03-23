@@ -283,7 +283,7 @@ public:
 
                 angle = atan2(diffZ, sqrt(diffX*diffX + diffY*diffY) ) * 180 / M_PI;
 
-                if (abs(angle - sensorMountAngle) <= 10){
+                if (abs(angle - sensorMountAngle) <= 4){
                     groundMat.at<int8_t>(i,j) = 1;
                     groundMat.at<int8_t>(i+1,j) = 1;
                 }

@@ -20,9 +20,10 @@
         <arg name="model_xacro" default="$(arg model_xacro)" />
     </include>-->
 
-
-    <!--- Run VLP16 -->
-    <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+    <group if="$(eval not sim)">
+        <!--- Run VLP16 if sim == false -->
+        <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+    </group>
 
     <!--- Run Move Base -->
     <include file="$(find gromi_scan_planning)/launch/include/move_base.launch" >
@@ -36,3 +37,4 @@
     </include>
 
 </launch>
+

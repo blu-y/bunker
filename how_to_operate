@@ -1,0 +1,39 @@
+
+rosrun bunker_bringup bringup_can2usb.bash
+
+roslaunch bunker_bringup bunker_control_frontier.launch
+# from real pointcloud
+roslaunch bunker_bringup bunker_control_frontier.launch sim:=true 
+# from rosbag pointcloud (it will use sim_time and disable vlp16 driver node)
+# rosbag play <bagfile>.bag --clock --topic /velodyne_points
+
+roslaunch gromi_scan_planning bunker_run.launch 
+
+
+03/21
+# 'pub_tf' arguments in bunker_control_base.launch was declared 'string' not 'bool' 
+# >> changed to 'bool'
+# used LeGO-LoAM parameter 'use_sim_time' = true to use bag of pointcloud 
+# >> added 'sim' argument (default=false) to bunker_control_frontier.launch
+03/23
+# prevent curb removal
+# >> LeGO-LOAM imageProjection.cpp line 286 '<=10' changed to '<=4'
+# 가만히 계속 도는 행위를 하는 이유는 사람 등 dynamic obstacle이 global map에 영구적으로 저장되어 있는 듯 함 (~/Pictures/0324_exp2_stuck_1,2.png)
+
+
+roslaunch bunker_bringup bunker_robot_base.launch
+
+# launch bunker robot control -> generate /smoother_cmd_vel -> /cmd_vel
+roslaunch bunker_bringup bunker_control.launch
+
+roslaunch bunker_bringup bunker_teleop_keyboard.launch
+
+roslaunch gromi_scan_planning bunker_run.launch
+
+
+
+rosrun bunker_bringup bringup_can2usb.bash
+
+roslaunch bunker_bringup bunker_control_traversability.launch
+
+roslaunch traversability_mapping online.launch
