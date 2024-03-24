@@ -1,24 +1,51 @@
 
 rosrun bunker_bringup bringup_can2usb.bash
 
-roslaunch bunker_bringup bunker_control_frontier.launch
-# from real pointcloud
-roslaunch bunker_bringup bunker_control_frontier.launch sim:=true 
-# from rosbag pointcloud (it will use sim_time and disable vlp16 driver node)
-# rosbag play <bagfile>.bag --clock --topic /velodyne_points
+roslaunch bunker_bringup bunker_control_frontier.launch # from real pointcloud
+roslaunch bunker_bringup bunker_control_frontier.launch sim:=true # from rosbag pointcloud
+        # (it will use sim_time and disable vlp16 driver node)
+        # rosbag play <bagfile>.bag --clock --topic /velodyne_points
 
 roslaunch gromi_scan_planning bunker_run.launch 
 
 
 03/21
-# 'pub_tf' arguments in bunker_control_base.launch was declared 'string' not 'bool' 
-# >> changed to 'bool'
-# used LeGO-LoAM parameter 'use_sim_time' = true to use bag of pointcloud 
-# >> added 'sim' argument (default=false) to bunker_control_frontier.launch
+'pub_tf' arguments in bunker_control_base.launch was declared 'string' not 'bool' 
+#   >> changed to 'bool'
+used LeGO-LoAM parameter 'use_sim_time' = true to use bag of pointcloud 
+#   >> added 'sim' argument (default=false) to bunker_control_frontier.launch
 03/23
-# prevent curb removal
-# >> LeGO-LOAM imageProjection.cpp line 286 '<=10' changed to '<=4'
-# 가만히 계속 도는 행위를 하는 이유는 사람 등 dynamic obstacle이 global map에 영구적으로 저장되어 있는 듯 함 (~/Pictures/0324_exp2_stuck_1,2.png)
+prevent curb removal
+#   >> LeGO-LOAM imageProjection.cpp line 286 '<=10' changed to '<=4'
+exp03_240324.bag 가만히 계속 도는 행위를 하는 현상
+#   >> 연석이 장애물로 인식되고 로봇이 연석에 가까이 있을 때 이런 현상이 발생함
+#       >> feasible한 local path가 생성되지 않는 듯함
+#   >> 또한 사람 등 dynamic obstacle이 global map에 영구적으로 저장됨 (~/Pictures/0324_exp2_stuck_1,2.png)
+#       >> octomap에 "latch"="false" parameter를 통해 어느정도 해결함
+#       >> 근본적인 해결 필요
+#   >> /segmented_cloud_pure에서 주는 cloud의 정보가 부족함.
+#       >> segmented cloud가 없는 방향은 아무것도 관측되지 않는 free space인데 이 부분의 바닥은 map에서 표시되지 않고 있음.
+#       >> 이 부분을 표시하면 local path가 생성될 것으로 예상됨, octomap을 건들여봐야 할듯
+03/24
+용량문제로 오래된 bag파일은 연구공유폴더/윤준영/bunker bag에 업로드 했습니다
+항트럴파크 연석 높이가 일정하지 않고 고저차가 일정하지 않아 어려움이 있음
+exp05_240324_indoor.bag 실내에서 실험, 벽이 가까울 때 속도가 많이 줄어드는 현상.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 roslaunch bunker_bringup bunker_robot_base.launch

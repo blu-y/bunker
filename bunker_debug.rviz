@@ -440,8 +440,8 @@ Visualization Manager:
     - Alpha: 0.5
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 62.15194320678711
-        Min Value: -62.738609313964844
+        Max Value: 13.332673072814941
+        Min Value: -31.393447875976562
         Value: true
       Axis: Y
       Channel Name: intensity
@@ -564,7 +564,7 @@ Visualization Manager:
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.30000001192092896
+      Line Width: 0.20000000298023224
       Name: Path
       Offset:
         X: 0
@@ -588,7 +588,7 @@ Visualization Manager:
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.20000000298023224
+      Line Width: 0.30000001192092896
       Name: Path
       Offset:
         X: 0
@@ -619,7 +619,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 80.82438659667969
+      Distance: 29.84187126159668
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -627,17 +627,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.731010377407074
-        Y: -1.8907406330108643
-        Z: 4.784653186798096
+        X: 2.0106167793273926
+        Y: 5.134038925170898
+        Z: 4.791599750518799
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.399796485900879
+      Pitch: 1.5697963237762451
       Target Frame: base_link
-      Yaw: 4.615528583526611
+      Yaw: 4.740530967712402
     Saved: ~
 Window Geometry:
   Displays:
