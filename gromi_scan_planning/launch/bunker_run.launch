@@ -21,7 +21,7 @@
 
     <include file="$(find explore_lite)/launch/explore.launch" />
  
-    <!--include file="$(find frontier_exploration)/launch/explore_costmap.launch" /-->
+    <!-- <include file="$(find explore_lite)/launch/explore_costmap.launch" /> -->
  
     <!--node pkg="gromi_scan_planning" type="find_best_frontier.py" name="explore" output="screen" /-->
 

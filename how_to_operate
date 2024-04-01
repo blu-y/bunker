@@ -30,6 +30,13 @@ exp03_240324.bag 가만히 계속 도는 행위를 하는 현상
 용량문제로 오래된 bag파일은 연구공유폴더/윤준영/bunker bag에 업로드 했습니다
 항트럴파크 연석 높이가 일정하지 않고 고저차가 일정하지 않아 어려움이 있음
 exp05_240324_indoor.bag 실내에서 실험, 벽이 가까울 때 속도가 많이 줄어드는 현상.
+04/01
+Octomap에 들어가는 /segmented_cloud_pure는 이미 LeGO-LOAM에서 바닥이 제거된 cloud임.
+하지만 octomap에서는 따로 바닥 제거 알고리즘이 존재하며, 여기서 분류된 바닥은 free space를 등록하는 데 사용되나 바닥이 없는 cloud가 들어가면서 바닥이 free space로 등록되지 않음.
+따라서 octomap에서 LeGO-LOAM에서 발행하는 ground_cloud를 subscribe하여 이를 바닥 정보로 free space로 등록하도록 수정하였음.
+수정 후 실험 exp07_240401_ground.bag 에서는 바닥이 free space로 등록되어 path가 더 잘 생성되는 것을 확인함.
+하지만 LeGO-LOAM에서 Localization이 부정확하여(rolling 발생, z축으로 가라앉거나 떠오름) 바닥의 z값이 달라져, free space로 등록되지 않는 경우때문에 map 제작이 불완전함.
+IMU를 사용하여 실험해 보았지만, 오히려 더 오차가 커졌음.
 
 
 

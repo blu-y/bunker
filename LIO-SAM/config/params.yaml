@@ -3,8 +3,8 @@ lio_sam:
   # Topics
 #  pointCloudTopic: "points_raw"               # Point cloud data
   pointCloudTopic: "velodyne_points"               # Point cloud data
-  imuTopic: "imu_raw"                         # IMU data
-  odomTopic: "odometry/imu"                   # IMU pre-preintegration odometry, same frequency as IMU
+  imuTopic: "imu/data_raw"                         # IMU data
+  odomTopic: "odometry"                   # IMU pre-preintegration odometry, same frequency as IMU
   gpsTopic: "odometry/gpsz"                   # GPS odometry topic from navsat, see module_navsat.launch file
 
   # Frames

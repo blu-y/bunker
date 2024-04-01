@@ -1,13 +1,13 @@
 <?xml version='1.0'?>
 <launch>
 	<arg name="target_frame" default="base_link"/>
-	<arg name="frame_id" default="imu_link"/>
+	<arg name="frame_id" default="base_link"/>
 
 	<include file="$(find vectornav)/launch/vectornav.launch">
 		<arg name="frame_id" value="$(arg frame_id)"/>
 	</include>
 
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_imu_link" args="0 0 0 0 0 0        /base_link /imu_link   10" />
+    <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_to_imu_link" args="0 0 0 0 0 0        /base_link /imu_link   10" /> -->
 	
 	<!-- Transforms VN-100 tilted data in imu_link frame to ENU data in base_link frame -->
 	<node pkg="nodelet" type="nodelet" name="imu_manager" args="manager"/>
