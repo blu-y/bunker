@@ -64,3 +64,4 @@ rosrun bunker_bringup bringup_can2usb.bash
 roslaunch bunker_bringup bunker_control_traversability.launch
 
 roslaunch traversability_mapping online.launch
+
