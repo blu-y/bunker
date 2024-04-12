@@ -1,0 +1,78 @@
+
+rosrun bunker_bringup bringup_can2usb.bash
+roslaunch gromi_scan_planning runall.launch # sim:=true # for simulation with /velodyne_points
+
+
+
+
+
+03/21
+'pub_tf' arguments in bunker_control_base.launch was declared 'string' not 'bool' 
+#   >> changed to 'bool'
+used LeGO-LoAM parameter 'use_sim_time' = true to use bag of pointcloud 
+#   >> added 'sim' argument (default=false) to bunker_control_frontier.launch
+03/23
+prevent curb removal
+#   >> LeGO-LOAM imageProjection.cpp line 286 '<=10' changed to '<=4'
+exp03_240324.bag 가만히 계속 도는 행위를 하는 현상
+#   >> 연석이 장애물로 인식되고 로봇이 연석에 가까이 있을 때 이런 현상이 발생함
+#       >> feasible한 local path가 생성되지 않는 듯함
+#   >> 또한 사람 등 dynamic obstacle이 global map에 영구적으로 저장됨 (~/Pictures/0324_exp2_stuck_1,2.png)
+#       >> octomap에 "latch"="false" parameter를 통해 어느정도 해결함
+#       >> 근본적인 해결 필요
+#   >> /segmented_cloud_pure에서 주는 cloud의 정보가 부족함.
+#       >> segmented cloud가 없는 방향은 아무것도 관측되지 않는 free space인데 이 부분의 바닥은 map에서 표시되지 않고 있음.
+#       >> 이 부분을 표시하면 local path가 생성될 것으로 예상됨, octomap을 건들여봐야 할듯
+03/24
+용량문제로 오래된 bag파일은 연구공유폴더/윤준영/bunker bag에 업로드 했습니다
+항트럴파크 연석 높이가 일정하지 않고 고저차가 일정하지 않아 어려움이 있음
+exp05_240324_indoor.bag 실내에서 실험, 벽이 가까울 때 속도가 많이 줄어드는 현상.
+04/01
+Octomap에 들어가는 /segmented_cloud_pure는 이미 LeGO-LOAM에서 바닥이 제거된 cloud임.
+하지만 octomap에서는 따로 바닥 제거 알고리즘이 존재하며, 여기서 분류된 바닥은 free space를 등록하는 데 사용되나 바닥이 없는 cloud가 들어가면서 바닥이 free space로 등록되지 않음.
+따라서 octomap에서 LeGO-LOAM에서 발행하는 ground_cloud를 subscribe하여 이를 바닥 정보로 free space로 등록하도록 수정하였음.
+수정 후 실험 exp07_240401_ground.bag 에서는 바닥이 free space로 등록되어 path가 더 잘 생성되는 것을 확인함.
+하지만 LeGO-LOAM에서 Localization이 부정확하여(rolling 발생, z축으로 가라앉거나 떠오름) 바닥의 z값이 달라져, free space로 등록되지 않는 경우때문에 map 제작이 불완전함.
+IMU를 사용하여 실험해 보았지만, 오히려 더 오차가 커졌음.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+roslaunch bunker_bringup bunker_control_frontier.launch # from real pointcloud
+roslaunch bunker_bringup bunker_control_frontier.launch sim:=true # from rosbag pointcloud
+        # (it will use sim_time and disable vlp16 driver node)
+        # rosbag play <bagfile>.bag --clock --topic /velodyne_points
+
+roslaunch gromi_scan_planning bunker_run.launch 
+
+
+
+
+roslaunch bunker_bringup bunker_robot_base.launch
+
+# launch bunker robot control -> generate /smoother_cmd_vel -> /cmd_vel
+roslaunch bunker_bringup bunker_control.launch
+
+roslaunch bunker_bringup bunker_teleop_keyboard.launch
+
+roslaunch gromi_scan_planning bunker_run.launch
+
+
+
+rosrun bunker_bringup bringup_can2usb.bash
+
+roslaunch bunker_bringup bunker_control_traversability.launch
+
+roslaunch traversability_mapping online.launch
+
