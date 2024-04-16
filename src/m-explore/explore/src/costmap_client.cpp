@@ -52,9 +52,11 @@ Costmap2DClient::Costmap2DClient(ros::NodeHandle& param_nh,
                                  const tf::TransformListener* tf)
   : tf_(tf)
 {
+  std::string map_topic;
   std::string costmap_topic;
   std::string footprint_topic;
   std::string costmap_updates_topic;
+  param_nh.param("map_topic", map_topic, std::string("map"));
   param_nh.param("costmap_topic", costmap_topic, std::string("costmap"));
   param_nh.param("costmap_updates_topic", costmap_updates_topic,
                  std::string("costmap_updates"));
@@ -64,8 +66,13 @@ Costmap2DClient::Costmap2DClient(ros::NodeHandle& param_nh,
   param_nh.param("transform_tolerance", transform_tolerance_, 0.3);
 
   /* initialize costmap */
+  map_sub_ = subscription_nh.subscribe<nav_msgs::OccupancyGrid>(
+      map_topic, 10,
+      [this](const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+        SaveMap(msg);
+      });
   costmap_sub_ = subscription_nh.subscribe<nav_msgs::OccupancyGrid>(
-      costmap_topic, 1000,
+      costmap_topic, 100,
       [this](const nav_msgs::OccupancyGrid::ConstPtr& msg) {
         updateFullMap(msg);
       });
@@ -112,6 +119,14 @@ Costmap2DClient::Costmap2DClient(ros::NodeHandle& param_nh,
   }
 }
 
+void Costmap2DClient::SaveMap(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+{
+  std::lock_guard<std::mutex> lock(map_mutex);
+  map_data = msg->data;
+  map_info = msg->info;
+}
+
+
 void Costmap2DClient::updateFullMap(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
   global_frame_ = msg->header.frame_id;
@@ -145,7 +160,7 @@ void Costmap2DClient::updateFullMap(const nav_msgs::OccupancyGrid::ConstPtr& msg
 void Costmap2DClient::updatePartialMap(
     const map_msgs::OccupancyGridUpdate::ConstPtr& msg)
 {
-  ROS_DEBUG("received partial map update");
+  // ROS_DEBUG("received partial map update");
   global_frame_ = msg->header.frame_id;
 
   if (msg->x < 0 || msg->y < 0) {
@@ -248,5 +263,77 @@ std::array<unsigned char, 256> init_translation_table()
 
   return cost_translation_table;
 }
+
+
+double Costmap2DClient::getPercentageExplored(geometry_msgs::Point start, double max_distance)
+{
+    std::lock_guard<std::mutex> lock(map_mutex);
+    int explored_area = 0;
+    for (auto value : map_data) {
+        if (value != -1) {
+            explored_area++;
+        }
+    }
+    float resolution = map_info.resolution;
+    int total_area = static_cast<int>((2 * max_distance / resolution) * (2 * max_distance / resolution));
+    double percentage = 0.0;
+    if (total_area > 0) {
+        percentage = ((double)explored_area / (double)total_area) * 100.0;
+        ROS_DEBUG("Explored Area: %d, Total Area: %d, Percentage Explored: %f", explored_area, total_area, percentage);
+    }
+    return percentage;
+}
+
+
+// double Costmap2DClient::getPercentageExplored(geometry_msgs::Point start, double max_distance)
+// {
+//     // // Calculate the exploration area bounds relative to the robot's start position
+//     double resolution = costmap_.getResolution();
+//     // double min_x = (start.x - max_distance);
+//     // double max_x = (start.x + max_distance);
+//     // double min_y = (start.y - max_distance);
+//     // double max_y = (start.y + max_distance);
+//     int total_area = static_cast<int>((2 * max_distance / resolution) * (2 * max_distance / resolution));
+//     int explored_area = 0;
+//     auto* mutex = costmap_.getMutex();
+//     std::lock_guard<costmap_2d::Costmap2D::mutex_t> lock(*mutex);
+//     // int origin_x = costmap_.getOriginX();
+//     // int origin_y = costmap_.getOriginY();
+//     int grid_max_x = static_cast<int>(costmap_.getSizeInCellsX());
+//     int grid_max_y = static_cast<int>(costmap_.getSizeInCellsY());
+
+//     // // Calculate Intersection of the exploration area and the costmap
+//     // int start_x = std::max(static_cast<int>((min_x / resolution - origin_x)), 0);
+//     // int start_y = std::max(static_cast<int>((min_y / resolution - origin_y)), 0);
+//     // int end_x = std::min(static_cast<int>((max_x / resolution - origin_x)), grid_max_x);
+//     // int end_y = std::min(static_cast<int>((max_y / resolution - origin_y)), grid_max_y);
+
+//     // // Calculate the number of explored cells within the exploration area
+//     // for (int x = start_x; x < end_x; ++x) {
+//     //     for (int y = start_y; y < end_y; ++y) {
+//     //         if (costmap_.getCost(x, y) != cost_translation_table__[255]) { // 255 should be the UNKNOWN value
+//     //             explored_area += 1;
+//     //         }
+//     //     }
+//     // }
+//     // Calculate the number of explored cells
+//     for (int x = 0; x < grid_max_x; ++x) {
+//         for (int y = 0; y < grid_max_y; ++y) {
+//             if (costmap_.getCost(x, y) != cost_translation_table__[255]) { // 255 should be the UNKNOWN value
+//                 explored_area += 1;
+//             }
+//         }
+//     }
+//     // Calculate the percentage of explored area within the total possible exploration area
+//     double percentage = 0.0;
+//     if (total_area > 0) {
+//         percentage = ((double)explored_area / (double)total_area) * 100.0;
+//         // ROS_DEBUG("Resolution: %f, Min_x: %f, Max_x: %f, Min_y: %f, Max_y: %f", resolution, min_x, max_x, min_y, max_y);
+//         // ROS_DEBUG("Origin_x: %d, Origin_y: %d, Grid_max_x: %d, Grid_max_y: %d", origin_x, origin_y, grid_max_x, grid_max_y);
+//         // ROS_DEBUG("start_x: %d, start_y: %d, end_x: %d, end_y: %d", start_x, start_y, end_x, end_y);
+//         ROS_DEBUG("Explored Area: %d, Total Area: %d, Percentage Explored: %f", explored_area, total_area, percentage);
+//     }
+//     return percentage;
+// }
 
 }  // namespace explore

@@ -85,6 +85,7 @@ private:
 
   bool goalOnBlacklist(const geometry_msgs::Point& goal);
   bool goalOutofHeading(const geometry_msgs::Point& goal);
+  void returnHome();
 
   ros::NodeHandle private_nh_;
   ros::NodeHandle relative_nh_;
@@ -112,6 +113,10 @@ private:
   double maximum_distance_;
   double heading_angle_;
   geometry_msgs::Pose pose;
+  double search_percentage_;
+  geometry_msgs::Point start_point;
+  bool return_home_;
+  int empty_frontier_timeout = 60;
 };
 }
 

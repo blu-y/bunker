@@ -70,6 +70,8 @@ Explore::Explore()
   private_nh_.param("min_frontier_size", min_frontier_size, 0.5);
   private_nh_.param("maximum_distance", maximum_distance_, 100.0);
   private_nh_.param("heading_angle", heading_angle_, 180.0);
+  private_nh_.param("search_percentage", search_percentage_, -1.0);
+  private_nh_.param("return_home", return_home_, true);
 
   search_ = frontier_exploration::FrontierSearch(costmap_client_.getCostmap(),
                                                  potential_scale_, gain_scale_,
@@ -83,7 +85,9 @@ Explore::Explore()
   ROS_INFO("Waiting to connect to move_base server");
   move_base_client_.waitForServer();
   ROS_INFO("Connected to move_base server");
-
+  pose = costmap_client_.getRobotPose();
+  start_point = pose.position;
+  ROS_DEBUG("Starting exploration from %f, %f", start_point.x, start_point.y);
   exploring_timer_ =
       relative_nh_.createTimer(ros::Duration(1. / planner_frequency_),
                                [this](const ros::TimerEvent&) { makePlan(); });
@@ -180,11 +184,20 @@ void Explore::visualizeFrontiers(
 
 void Explore::makePlan()
 {
+
+  if (search_percentage_ > 0.0) {
+    double percentage = costmap_client_.getPercentageExplored(start_point, maximum_distance_);
+    ROS_INFO("Explored %.2f%% of the map", percentage);
+    if (percentage > search_percentage_) {
+      stop();
+      return;
+    }
+  }
   // find frontiers
   pose = costmap_client_.getRobotPose();
   // get frontiers sorted according to cost
   auto frontiers = search_.searchFrom(pose.position);
-  ROS_DEBUG("found %lu frontiers", frontiers.size());
+  ROS_INFO("found %lu frontiers", frontiers.size());
   for (size_t i = 0; i < frontiers.size(); ++i) {
     ROS_DEBUG("frontier %zd cost: %f, %.2f, %.2f",
       i, frontiers[i].cost,
@@ -192,7 +205,12 @@ void Explore::makePlan()
   }
 
   if (frontiers.empty()) {
-    stop();
+    empty_frontier_timeout--;
+    if (empty_frontier_timeout == 0) {
+      ROS_INFO("No frontiers found");
+      if (return_home_) returnHome();
+      stop();
+    }
     return;
   }
 
@@ -207,7 +225,7 @@ void Explore::makePlan()
                        [this](const frontier_exploration::Frontier& f) {
                         bool outofHeading = goalOutofHeading(f.centroid);
                         bool onBlacklist = goalOnBlacklist(f.centroid);
-                        ROS_DEBUG("Checking frontier %f, %.2f, %.2f, OOH %d, OB %d", f.cost, f.centroid.x, f.centroid.y, outofHeading, onBlacklist);
+                        ROS_DEBUG("Checking frontier %.3f, %.2f, %.2f, OOH %d, OB %d", f.cost, f.centroid.x, f.centroid.y, outofHeading, onBlacklist);
                         return outofHeading || onBlacklist;
                         });
   if (frontier == frontiers.end()) {
@@ -217,7 +235,7 @@ void Explore::makePlan()
         std::find_if_not(frontiers.begin(), frontiers.end(),
                         [this](const frontier_exploration::Frontier& f) {
                           bool onBlacklist = goalOnBlacklist(f.centroid);
-                          ROS_DEBUG("Checking frontier %f, %.2f, %.2f, OB %d", f.cost, f.centroid.x, f.centroid.y, onBlacklist);
+                          ROS_DEBUG("Checking frontier %.3f, %.2f, %.2f, OB %d", f.cost, f.centroid.x, f.centroid.y, onBlacklist);
                           return onBlacklist;
                         });
     if (frontier == frontiers.end()) {
@@ -225,7 +243,7 @@ void Explore::makePlan()
       return;
     }
   }
-  ROS_DEBUG("Selected frontier %f, %.2f, %.2f", frontier->cost, frontier->centroid.x, frontier->centroid.y);
+  ROS_INFO("Selected frontier %f, %.2f, %.2f", frontier->cost, frontier->centroid.x, frontier->centroid.y);
 
   geometry_msgs::Point target_position = frontier->centroid;
 
@@ -327,9 +345,25 @@ void Explore::start()
 
 void Explore::stop()
 {
-  move_base_client_.cancelAllGoals();
+  // move_base_client_.cancelAllGoals();
   exploring_timer_.stop();
+  if (return_home_) returnHome();
   ROS_INFO("Exploration stopped.");
+}
+
+void Explore::returnHome()
+{
+  ROS_INFO("Returning home");
+  move_base_msgs::MoveBaseGoal goal;
+  goal.target_pose.pose.position = start_point;
+  goal.target_pose.pose.orientation.w = 1.0;
+  goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
+  goal.target_pose.header.stamp = ros::Time::now();
+  move_base_client_.sendGoal(
+      goal, [this](const actionlib::SimpleClientGoalState& status,
+                   const move_base_msgs::MoveBaseResultConstPtr& result) {
+        ROS_DEBUG("Returned home with status: %s", status.toString().c_str());
+      });
 }
 
 }  // namespace explore
@@ -338,7 +372,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "explore");
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
-                                     ros::console::levels::Debug)) {
+                                     ros::console::levels::Info)) {
     ros::console::notifyLoggerLevelsChanged();
   }
   explore::Explore explore;

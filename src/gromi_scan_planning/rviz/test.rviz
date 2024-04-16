@@ -433,8 +433,8 @@ Visualization Manager:
     - Alpha: 0.5
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 5.267056465148926
-        Min Value: -5.179770469665527
+        Max Value: 28.86652374267578
+        Min Value: -13.457874298095703
         Value: true
       Axis: Y
       Channel Name: intensity
@@ -490,12 +490,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -649,7 +649,7 @@ Visualization Manager:
       Marker Topic: /explore/frontiers
       Name: MarkerArray
       Namespaces:
-        {}
+        frontiers: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -668,7 +668,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 46.155399322509766
+      Distance: 167.67221069335938
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -676,17 +676,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 2.0106167793273926
-        Y: 5.134038925170898
-        Z: 4.791599750518799
+        X: -46.090370178222656
+        Y: 26.26034927368164
+        Z: -2.7351512908935547
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8447969555854797
+      Pitch: 1.5347962379455566
       Target Frame: base_link
-      Yaw: 3.6855251789093018
+      Yaw: 4.771272659301758
     Saved: ~
 Window Geometry:
   Displays:

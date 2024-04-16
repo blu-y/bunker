@@ -67,6 +67,10 @@ public:
    * @return pose of the robot in the global frame of the costmap
    */
   geometry_msgs::Pose getRobotPose() const;
+  std::mutex map_mutex;
+  std::vector<int8_t> map_data;
+  nav_msgs::MapMetaData map_info;
+  double getPercentageExplored(geometry_msgs::Point start, double maximum_distance);
 
   /**
    * @brief Return a pointer to the "master" costmap which receives updates from
@@ -109,6 +113,7 @@ public:
   }
 
 protected:
+  void SaveMap(const nav_msgs::OccupancyGrid::ConstPtr& msg);
   void updateFullMap(const nav_msgs::OccupancyGrid::ConstPtr& msg);
   void updatePartialMap(const map_msgs::OccupancyGridUpdate::ConstPtr& msg);
 
@@ -122,6 +127,7 @@ protected:
 
 private:
   // will be unsubscribed at destruction
+  ros::Subscriber map_sub_;
   ros::Subscriber costmap_sub_;
   ros::Subscriber costmap_updates_sub_;
 };
